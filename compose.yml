@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"   # change both to 8080 if you switch ports
+    restart: unless-stopped
+    
+nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      # - "443:443"    # uncomment when you add TLS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # TLS later:
+      # - ./nginx/certs:/etc/nginx/certs:ro
+    restart: unless-stopped

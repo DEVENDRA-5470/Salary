@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Salary Duplicate Checker</title>
+  <style>
+    :root{
+      /* layout */
+      --container: 1080px;
+      --radius: 14px;
+      --hero-height: 300px;
+
+      /* brand */
+      --brand: #ff0000;        /* blue-600 */
+      --brand-2: #e90e0e;      /* sky-500 */
+
+      /* surface & text (light) */
+      --bg: #ffffff;
+      --text: #0f172a;         /* slate-900 */
+      --muted: #475569;        /* slate-600 */
+      --border: #e5e7eb;       /* gray-200 */
+      --card: #ffffff;
+      --shadow: 0 8px 28px rgba(2,6,23,.08);
+
+      /* chips & tables */
+      --chip: #ffffff;         /* slate-100 */
+      --chip-border: #e2e8f0;  /* slate-200 */
+      --thead: #f8fafc;        /* slate-50 */
+      --row-alt: #f9fafb;
+
+      /* states */
+      --ok: #059669;           /* green-600 */
+      --bad: #dc2626;          /* red-600 */
+      --ok-soft: #ecfdf5;
+      --bad-soft: #fef2f2;
+      --ok-brd: #a7f3d0;
+      --bad-brd: #fecaca;
+    }
+
+    *{box-sizing:border-box;margin: 0;padding: 0;}
+    body{
+   
+      /* top hero gradient only; rest pure white */
+      background:
+        linear-gradient(#016557f2 ,#08f2dbda);   
+       
+      color:var(--text);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      height: 100vh;
+      font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial;
+      line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{max-width:var(--container);margin:40px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:28px;
+      box-shadow:var(--shadow);
+    }
+
+    h1{
+      margin:0 0 6px;
+      font-size:30px;
+      letter-spacing:.2px;
+      background:linear-gradient(90deg, #10b981, #22c55e, #60a5fa);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    p.sub{margin:0 0 18px;color:var(--muted)}
+
+    /* uploader */
+    .uploader{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    .file-input{display:none}
+    .dropzone{
+      display:flex;gap:12px;align-items:center;cursor:pointer;
+      background:var(--chip);
+      border:2px dashed var(--chip-border);
+      padding:16px 18px;border-radius:var(--radius);
+      transition: border-color .15s ease, background .15s ease, transform .08s ease;
+      outline:none;
+    }
+    .dropzone:hover{border-color:var(--brand); transform:translateY(-1px)}
+    .dropzone.dragover{border-color:var(--brand-2); background:#eef6ff}
+    .dz-icon{width:22px;height:22px;color:var(--brand)}
+    .dz-title{font-weight:700}
+    .dz-hint{font-size:12px;color:#64748b}
+    .file-name{font-size:14px;color:#64748b}
+
+    /* button */
+    button{
+      background:linear-gradient(90deg, var(--brand), var(--brand-2));
+      color:#ffffff;
+      border:none;
+      padding:12px 18px; border-radius:12px;
+      font-weight:700; cursor:pointer;
+      transition: transform .08s ease, opacity .15s ease, box-shadow .15s ease;
+      box-shadow: 0 6px 14px rgba(37,99,235,.18);
+    }
+    button[disabled]{opacity:.6;cursor:not-allowed;box-shadow:none}
+    button:hover:not([disabled]){transform:translateY(-1px)}
+
+    /* statuses */
+    .status{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:700; padding:10px 12px; border-radius:999px;
+      border:1px solid transparent;
+    }
+    .ok{background:var(--ok-soft); color:var(--ok); border-color:var(--ok-brd)}
+    .bad{background:var(--bad-soft); color:var(--bad); border-color:var(--bad-brd)}
+
+    /* tables */
+    .table-wrap{margin-top:16px; border:1px solid var(--border); border-radius:12px; overflow:auto}
+    table{width:100%; border-collapse:separate; border-spacing:0; background:#fff}
+    th,td{padding:12px 14px; text-align:left; font-size:15px}
+    thead th{
+      position:sticky; top:0; z-index:1;
+      background:var(--thead); color:#0f172a; font-weight:700;
+      border-bottom:1px solid var(--border);
+    }
+    tbody tr:nth-child(even) td{background:var(--row-alt)}
+    tbody tr:hover td{background:#f1f5f9}
+    tr + tr td{border-top:1px solid var(--border)}
+
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      background:var(--chip); border:1px solid var(--chip-border);
+      padding:6px 10px; border-radius:999px; font-size:12px; color:#334155;
+    }
+
+    details{
+      background:#fff; border:1px solid var(--border);
+      border-radius:12px; padding:10px 12px; margin-top:12px;
+    }
+    summary{cursor:pointer; font-weight:600; color:#0f172a}
+
+    .empty{margin-top:16px; color:var(--muted)}
+    footer{margin-top:24px; color:#64748b; font-size:13px; text-align:center}
+
+    /* responsive */
+    .split{display:grid; grid-template-columns:1fr; gap:18px}
+    @media (min-width:900px){ .split{grid-template-columns:1fr 1fr} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Sucess24</h1>
+      <p class="sub">Upload your bank statement PDF. We detect duplicates by <b>transaction month</b> and by <b>payroll label</b>.</p>
+
+      <form method="post" action="/check" enctype="multipart/form-data" class="uploader" id="uploadForm">
+        <input class="file-input" id="pdfInput" type="file" name="pdf" accept="application/pdf" required>
+        <div id="dropzone" class="dropzone" role="button" aria-label="Upload PDF">
+          <svg class="dz-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4A1 1 0 1 1 8.7 10.3L11 12.6V4a1 1 0 0 1 1-1zM5 19a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5z"/>
+          </svg>
+          <div>
+            <div class="dz-title">Click to upload PDF</div>
+            <div class="dz-hint">or drag & drop</div>
+          </div>
+        </div>
+        <button id="submitBtn" type="submit" disabled>Upload & Check</button>
+        <span id="fileName" class="file-name">No file chosen</span>
+      </form>
+
+      {% if result is not none %}
+        <div style="margin-top:16px;">
+          {% if result %}<span class="status ok">✓ Duplicate salary detected</span>
+          {% else %}<span class="status bad">✕ No duplicate salary found</span>{% endif %}
+        </div>
+
+        <div class="split">
+          <div>
+            <h3 style="margin:18px 0 6px;">By Transaction Month</h3>
+            {% if duplicates_txn %}
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                  <tr><th style="width:160px;">Month</th><th style="width:100px;">Count</th><th>Pages</th></tr>
+                  </thead>
+                  <tbody>
+                  {% for d in duplicates_txn %}
+                    <tr>
+                      <td>{{ d.month }}</td>
+                      <td>{{ d.count }}</td>
+                      <td>
+                        <div class="chips">
+                          {% if d.pages %}{% for p in d.pages %}<span class="chip">Page {{ p }}</span>{% endfor %}
+                          {% else %}<span class="chip">n/a</span>{% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              {% for d in duplicates_txn %}
+                <details>
+                  <summary>Examples for {{ d.month }} ({{ d.count }})</summary>
+                  <div class="examples">
+                    <div class="table-wrap">
+                      <table>
+                        <thead><tr><th style="width:160px;">Date</th><th style="width:100px;">Page</th><th>Description</th></tr></thead>
+                        <tbody>
+                          {% for e in d.examples %}
+                            <tr><td>{{ e.date }}</td><td>{{ e.page }}</td><td>{{ e.line }}</td></tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </details>
+              {% endfor %}
+            {% else %}
+              <p class="empty">No duplicates by transaction month.</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <h3 style="margin:18px 0 6px;">By Payroll Label (e.g., SALARY MAY)</h3>
+            {% if duplicates_label %}
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                  <tr><th style="width:160px;">Label</th><th style="width:100px;">Count</th><th>Pages</th></tr>
+                  </thead>
+                  <tbody>
+                  {% for d in duplicates_label %}
+                    <tr>
+                      <td>{{ d.label }}</td>
+                      <td>{{ d.count }}</td>
+                      <td>
+                        <div class="chips">
+                          {% if d.pages %}{% for p in d.pages %}<span class="chip">Page {{ p }}</span>{% endfor %}
+                          {% else %}<span class="chip">n/a</span>{% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              {% for d in duplicates_label %}
+                <details>
+                  <summary>Examples for {{ d.label }} ({{ d.count }})</summary>
+                  <div class="examples">
+                    <div class="table-wrap">
+                      <table>
+                        <thead><tr><th style="width:160px;">Date</th><th style="width:100px;">Page</th><th>Description</th></tr></thead>
+                        <tbody>
+                          {% for e in d.examples %}
+                            <tr><td>{{ e.date }}</td><td>{{ e.page }}</td><td>{{ e.line }}</td></tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </details>
+              {% endfor %}
+            {% else %}
+              <p class="empty">No duplicates by payroll label.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <footer>Powered and Made by Success24 🧑‍💻</footer>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('pdfInput');
+    const dz = document.getElementById('dropzone');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function setName(f){
+      const kb = Math.round(f.size/1024);
+      fileName.textContent = f.name + (isNaN(kb) ? "" : " (" + kb + " KB)");
+    }
+
+    input.addEventListener('change', () => {
+      if (input.files && input.files.length){
+        const f = input.files[0];
+        if (f.type && !/pdf/i.test(f.type)){
+          alert('Please select a PDF file');
+          input.value = '';
+          fileName.textContent = 'No file chosen';
+          submitBtn.disabled = true;
+          return;
+        }
+        setName(f); submitBtn.disabled = false;
+      } else {
+        fileName.textContent = 'No file chosen';
+        submitBtn.disabled = true;
+      }
+    });
+
+    dz.addEventListener('click', () => input.click());
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault(); dz.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files && files.length){
+        const f = files[0];
+        if (f.type && !/pdf/i.test(f.type)){ alert('Drop a PDF file'); return; }
+        input.files = files; input.dispatchEvent(new Event('change'));
+      }
+    });
+  </script>
+</body>
+</html>
