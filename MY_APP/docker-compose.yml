@@ -1,0 +1,10 @@
+services:
+  my_app:
+    build: .
+    container_name: my_app_container
+    ports:
+      - "5000:5000"  # maps host port 5000 to container port 5000
+    volumes:
+      - .:/app       # optional: syncs local folder with container for live changes
+    environment:
+      - PYTHONUNBUFFERED=1
