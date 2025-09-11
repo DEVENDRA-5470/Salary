@@ -1,24 +1,33 @@
-version: "3.8"
-
 services:
   my_app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: my_app_container
     ports:
-      - "5000:5000"   # expose Flask directly on localhost for dev
+      - "5000:5000"
     volumes:
-      - .:/app        # good for local dev, can remove in prod
+      - .:/app
     environment:
       - PYTHONUNBUFFERED=1
     restart: always
+    networks:
+      - app_network
 
   nginx:
     image: nginx:latest
     container_name: nginx_container
     ports:
-      - "80:80"       # production entrypoint
+      - "8080:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - my_app
     restart: always
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+    name: app_network
